@@ -69,22 +69,18 @@ class BaseCFGReducer {
 
 protected:
     using SuccList = std::vector<ShPtr<CFGNode>>;
-    using BBSet = std::unordered_set<llvm::BasicBlock *>;
-    using CFGNodeQueue = std::queue<ShPtr<CFGNode>>;
-	using CFGNodeStack = std::stack<ShPtr<CFGNode>>;
 	using CFGNodeVector = std::vector<ShPtr<CFGNode>>;
-	using LoopSet = std::unordered_set<llvm::Loop *>;
-
-    using MapLoopToCFGNode = std::unordered_map<llvm::Loop *, ShPtr<CFGNode>>;
-    using MapBBToBBSet = std::unordered_map<llvm::BasicBlock *, BBSet>;
 
     using CondToNodeList = std::vector<std::pair<ShPtr<Expression>, ShPtr<CFGNode>>>;
 
     using SwitchClause = std::pair<ExprVector, ShPtr<CFGNode>>;
     using SwitchClauseVector = std::vector<ShPtr<SwitchClause>>;
-    using SwitchClauseBody = std::pair<ExprVector, ShPtr<Statement>>;
     using SwitchClauseBodyVector = std::vector<ShPtr<SwitchClauseBody>>;
+
+private:
+    using CFGNodeStack = std::stack<ShPtr<CFGNode>>;
     using MapCFGNodeToSwitchClause = std::unordered_map<ShPtr<CFGNode>, ShPtr<SwitchClause>>;
+    using SwitchClauseBody = std::pair<ExprVector, ShPtr<Statement>>;
 
 private:
     StructureConverter *sc;

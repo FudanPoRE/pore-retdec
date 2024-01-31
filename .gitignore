@@ -1,2 +1,5 @@
 /build*/
 /Debug/
+
+/include/retdec/llvmir2hll/llvm/llvmir2bir_converter/pore_cfg_reducer.h
+/src/llvmir2hll/llvm/llvmir2bir_converter/pore_cfg_reducer.cpp

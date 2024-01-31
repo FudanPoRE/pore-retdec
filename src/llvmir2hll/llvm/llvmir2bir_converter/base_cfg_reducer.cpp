@@ -47,8 +47,6 @@ bool BaseCFGReducer::reduceCFG(ShPtr<CFGNode> cfg) {
 * @brief 遍历给定的控制流图节点 @a cfg 并将化简所有节点直至控制流图中只包含一个节点。
 *        当节点 @a cfg 在循环中时, 仅化简该循环, 而不化简循环外的节点。
 *
-* @returns 如果有节点被化简则返回 @c true 否则返回 @c false.
-*
 * @par 前置条件
 *  - @a cfg 不为 @c nullptr .
 */
