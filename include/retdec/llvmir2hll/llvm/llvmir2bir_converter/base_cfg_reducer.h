@@ -75,12 +75,12 @@ protected:
 
     using SwitchClause = std::pair<ExprVector, ShPtr<CFGNode>>;
     using SwitchClauseVector = std::vector<ShPtr<SwitchClause>>;
+    using SwitchClauseBody = std::pair<ExprVector, ShPtr<Statement>>;
     using SwitchClauseBodyVector = std::vector<ShPtr<SwitchClauseBody>>;
 
 private:
     using CFGNodeStack = std::stack<ShPtr<CFGNode>>;
     using MapCFGNodeToSwitchClause = std::unordered_map<ShPtr<CFGNode>, ShPtr<SwitchClause>>;
-    using SwitchClauseBody = std::pair<ExprVector, ShPtr<Statement>>;
 
 private:
     StructureConverter *sc;
