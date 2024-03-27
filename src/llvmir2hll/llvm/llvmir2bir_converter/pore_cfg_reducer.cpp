@@ -13,12 +13,7 @@ namespace llvmir2hll {
 bool PoRECFGReducer::inspectCFGNode(ShPtr<CFGNode> node) {
     PRECONDITION_NON_NULL(node);
 
-    /* 
-    * TODO: 根据CFG的代码模式识别高级语言结构, 并生成结构化代码, 从而化简CFG.
-    * 提示: 模版给定的代码仅作参考, 可以任意修改pore_cfg_reducer.cpp和pore_cfg_reducer.h,
-    *      仅需保证这两个代码文件在框架中能够被正确编译和运行, 完成指定任务.
-    */
-
+    // utils::io::Log::phase("TESTTEST");
     if (tryReduceLoop(node)) {
         return true;
     } else if (tryReduceSequence(node)) {
@@ -35,67 +30,150 @@ bool PoRECFGReducer::inspectCFGNode(ShPtr<CFGNode> node) {
 void PoRECFGReducer::inspectCFGNodeComplete(ShPtr<CFGNode> node) {
     PRECONDITION_NON_NULL(node);
 
-    /* 
-     * TODO: 处理有后继节点, 但是没有被inspectCFGNode识别和化简的CFGNode.
-     * 提示: 需要考虑三种类型: 
-     *     (1) node是switch语句;
-     *     (2) node有两个后继节点;
-     *     (3) node有一个后继节点, 已经编写了示例.
-     */
-
     CFGNodeVector succs;
-    if (node->getSuccNum() > 0) {
-        // 提示: 下面是一个化简CFG的示例代码, 所有CFG的化简都可以使用reduceNode完成
+    if (isSwitch(node)) {
+        // TODO: reduce switch
+    } else if (node->getSuccNum() == 2) {
+        auto cond = getNodeCondExpr(node);
+        auto ifTrue = getGotoBody(node, node->getSucc(0));
+        auto ifFalse = getGotoBody(node, node->getSucc(1));
+        auto body = getIfStmt(cond, ifTrue, ifFalse);
+        reduceNode(node, body, succs);
+        LOG << "Completely reduced if: " << node->getDebugStr() << "\n";
+    } else if (node->getSuccNum() == 1) {
+        auto body = getGotoBody(node, node->getSucc(0));
+        succs = node->getSuccessors();
+        reduceNode(node, body, succs);
+        LOG << "Completely reduced goto: " << node->getDebugStr() << "\n";
+    } else if (node->getSuccNum() > 0) {
+        // Completely reduce the node.
         reduceNode(node, node->getBody(), succs, false);
-
-        // 提示: 可以通过下面的方式在测试时打印Log
-        // LOG << "Completely ignore node successors: " << node->getDebugStr() << "\n";
+        LOG << "Completely ignore node: " << node->getDebugStr() << "\n";
     }
 }
 
 bool PoRECFGReducer::tryReduceSequence(ShPtr<CFGNode> node) {
-    /*
-    * TODO: 识别并化简顺序结构, 注意有些顺序结构有多个前继节点
-    */
-    return false;
+    if (node->getSuccNum() != 1) {
+        return false;
+    }
+
+    auto succ = node->getSucc(0);
+    if (succ->getPredsNum() != 1 || succ == node) {
+        return false;
+    }
+
+    LOG << "Try reduce sequence: " << node->getDebugStr() << "\n";
+
+    ShPtr<Statement> succBody = succ->getBody();
+    CFGNodeVector succSuccs = succ->getSuccessors();
+    reduceNode(node, succBody, succSuccs);
+
+    LOG << "Reduced sequence: " << node->getDebugStr() << "\n";
+    return true;
 }
 
 bool PoRECFGReducer::tryReduceIf(ShPtr<CFGNode> node) {
-    /*
-    * TODO: 识别并化简 if 结构，优先考虑下面两种简单结构
-    * 第一种 if-else:
-    * node
-    *  ├── ifNode
-    *  |     └── ifSucc
-    *  └── elseNode
-    *        └── ifSucc
-    *
-    * 第二种 简单if:
-    * node
-    *  ├── ifNode
-    *  |     └── ifSucc
-    *  └── ifSucc
-    */
+    if (node->getSuccNum() != 2) {
+        return false;
+    }
+
+    ShPtr<CFGNode> ifSucc;
+    ShPtr<CFGNode> ifNode, elseNode;
+
+    ShPtr<Statement> ifBody, elseBody;
+    ShPtr<Expression> cond = getNodeCondExpr(node);
+    ShPtr<Statement> ifStmt = nullptr;
+
+    // Is if-else statement
+    // node
+    //  ├── ifNode
+    //  |     └── ifSucc
+    //  └── elseNode
+    //        └── ifSucc
+    ifNode = node->getSucc(0);
+    elseNode = node->getSucc(1);
+
+    if (ifNode->getPredsNum() == 1 && ifNode->getSuccNum() == 1
+        && elseNode->getPredsNum() == 1 && elseNode->getSuccNum() == 1
+        && ifNode->getSucc(0) == elseNode->getSucc(0)) {
+
+        LOG << "Try reduce if-else: " << node->getDebugStr() << "\n";
+        ifSucc = ifNode->getSucc(0);
+        ifBody = getIfClauseBody(node, ifNode, ifSucc);
+        elseBody = getIfClauseBody(node, elseNode, ifSucc);
+        ifStmt = getIfStmt(cond, ifBody, elseBody);
+    } 
+    
+    if (!ifStmt) {
+
+        // is if statement
+        // node
+        //  ├── ifNode
+        //  |     └── ifSucc
+        //  └── ifSucc
+        for (int index = 0; index < 2; index++) {
+            ifNode = node->getSucc(index);
+            ifSucc = node->getSucc(1 - index);
+
+            if (ifNode->getPredsNum() == 1 && ifNode->getSuccNum() == 1
+                && ifNode->getSucc(0) == ifSucc) {
+                LOG << "Try reduce if: " << node->getDebugStr() << "\n";
+
+                ifBody = getIfClauseBody(node, ifNode, ifSucc);
+                elseBody = getIfClauseBody(node, nullptr, ifSucc);
+                // cond(succ1) is !cond(succ0)
+                if (index == 1) {
+                    cond = getLogicalNot(cond);
+                }
+                ifStmt = getIfStmt(cond, ifBody, elseBody);
+                break;
+            }
+        }
+    }
+
+    if (ifStmt) {
+        CFGNodeVector succs {ifSucc};
+        reduceNode(node, ifStmt, succs);
+        LOG << "Reduced if: " << node->getDebugStr() << "\n";
+        return true;
+    }
 
     return false;
 }
 
 bool PoRECFGReducer::tryReduceLoop(ShPtr<CFGNode> node) {
-    /* 
-    * TODO: 识别并化简 if 结构, 优先考虑下面的简单结构
-    * 注意查阅API文档
-    *
-    * while-true:
-    * node
-    *  └── node
-    */
+
+    // is while true statement
+    // node
+    //  └── node
+    if (isLoopHeader(node) && !isLoopHeaderUnderAnalysis(node)) {
+        LOG << "Try reduce loop: " << node->getDebugStr() << "\n";
+		enterLoop(node);
+		
+        while (!isLoopReduced(node) && reduceCFG(node)) {}
+
+        if (!isLoopReduced(node)) {
+            reduceCFGComplete(node);
+            tryReduceLoop(node);
+        }
+
+		leaveLoop();
+		return true;
+	}
+    if (node->getSuccNum() == 1 && node->getSucc(0) == node) {
+        CFGNodeVector succs;
+        auto body = getWhileBody(node);
+        auto cond = getBoolConst(true);
+        auto whileStmt = getWhileLoopStmt(node, cond, body);
+        reduceNode(node, whileStmt, succs, false);
+
+        LOG << "Reduced loop: " << node->getDebugStr() << "\n";
+        return true;
+    }
+    return false;
 }
 
 bool PoRECFGReducer::tryReduceSwitch(ShPtr<CFGNode> node) {
-    /* 
-    * TODO: 识别并化简 switch 结构, 注意查阅API文档, 并注意switch
-    * 相关的函数及其返回类型定义
-    */
     return false;
 }
 
