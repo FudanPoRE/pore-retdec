@@ -121,16 +121,15 @@ protected:
 		const ShPtr<CFGNode> &clause, const ShPtr<CFGNode> &ifSuccessor);
     ShPtr<Statement> getWhileBody(const ShPtr<CFGNode> &node);
     ShPtr<Statement> getGotoBody(const ShPtr<CFGNode> &node, const ShPtr<CFGNode> &target);
-    ///
 
     /// @name Create expressions
     /// @{
-    ShPtr<ConstBool> getBoolConst(bool value) const { return ConstBool::create(value); }
-    ShPtr<NotOpExpr> getLogicalNot(const ShPtr<Expression> &expr) const { return NotOpExpr::create(expr); }
-    ShPtr<AndOpExpr> getLogicalAnd(const ShPtr<Expression> &lhs, const ShPtr<Expression> &rhs) const { return AndOpExpr::create(lhs, rhs); }
-    ShPtr<Expression> getLogicalOr(const ShPtr<Expression> &lhs, const ShPtr<Expression> &rhs) const { return OrOpExpr::create(lhs, rhs); }
-    ShPtr<Expression> getNodeCondExpr(const ShPtr<CFGNode> &node) const { return getValueExpr(node->getCond()); }
-    ShPtr<Expression> getValueExpr(llvm::Value *value) const { return sc->converter->convertValueToExpression(value); }
+    ShPtr<ConstBool> getBoolConst(bool value) const;
+    ShPtr<NotOpExpr> getLogicalNot(const ShPtr<Expression> &expr) const;
+    ShPtr<AndOpExpr> getLogicalAnd(const ShPtr<Expression> &lhs, const ShPtr<Expression> &rhs) const;
+    ShPtr<Expression> getLogicalOr(const ShPtr<Expression> &lhs, const ShPtr<Expression> &rhs) const;
+    ShPtr<Expression> getNodeCondExpr(const ShPtr<CFGNode> &node) const;
+    ShPtr<Expression> getValueExpr(llvm::Value *value) const;
     /// @}
 
     /// @name Helper of loop reduction
