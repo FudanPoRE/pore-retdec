@@ -1,14 +1,28 @@
 
+set(DEP_BASE_URL
+    "http://10.176.37.16:9000/retdec/deps"
+    CACHE STRING "Base URL of dependencies."
+)
+
 set(CAPSTONE_URL
+    "${DEP_BASE_URL}/5.0-rc2.zip"
+    CACHE STRING "URL of Capstone archive to use."
+)
+set(CAPSTONE_URL_BAK
     "https://github.com/capstone-engine/capstone/archive/refs/tags/5.0-rc2.zip"
     CACHE STRING "URL of Capstone archive to use."
 )
+
 set(CAPSTONE_ARCHIVE_SHA256
     "c47acdabb9ba4922a6d68b96eb7e14a431bfef7d7c57cea1e5881f87776228b2"
     CACHE STRING ""
 )
 
 set(GOOGLETEST_URL
+    "${DEP_BASE_URL}/90a443f9c2437ca8a682a1ac625eba64e1d74a8a.zip"
+    CACHE STRING "URL of Googletest archive to use."
+)
+set(GOOGLETEST_URL_BAK
     "https://github.com/google/googletest/archive/90a443f9c2437ca8a682a1ac625eba64e1d74a8a.zip"
     CACHE STRING "URL of Googletest archive to use."
 )
@@ -18,6 +32,10 @@ set(GOOGLETEST_ARCHIVE_SHA256
 )
 
 set(KEYSTONE_URL
+    "${DEP_BASE_URL}/d7ba8e378e5284e6384fc9ecd660ed5f6532e922.zip"
+    CACHE STRING "URL of Keystone archive to use."
+)
+set(KEYSTONE_URL_BAK
     "https://github.com/keystone-engine/keystone/archive/d7ba8e378e5284e6384fc9ecd660ed5f6532e922.zip"
     CACHE STRING "URL of Keystone archive to use."
 )
@@ -27,6 +45,10 @@ set(KEYSTONE_ARCHIVE_SHA256
 )
 
 set(LLVM_URL
+    "${DEP_BASE_URL}/2a1f3d8a97241c6e91710be8f84cf3cf80c03390.zip"
+    CACHE STRING "URL of LLVM archive to use."
+)
+set(LLVM_URL_BAK
     "https://github.com/avast/llvm/archive/2a1f3d8a97241c6e91710be8f84cf3cf80c03390.zip"
     CACHE STRING "URL of LLVM archive to use."
 )
@@ -36,6 +58,10 @@ set(LLVM_ARCHIVE_SHA256
 )
 
 set(YARA_URL
+    "${DEP_BASE_URL}/v4.2.0-rc1.zip"
+    CACHE STRING "URL of Yara archive to use."
+)
+set(YARA_URL_BAK
     "https://github.com/VirusTotal/yara/archive/v4.2.0-rc1.zip"
     CACHE STRING "URL of Yara archive to use."
 )
@@ -45,6 +71,10 @@ set(YARA_ARCHIVE_SHA256
 )
 
 set(YARAMOD_URL
+    "${DEP_BASE_URL}/aa06dd408c492a8f4488774caf2ee105ccc23ab5.zip"
+    CACHE STRING "URL of YaraMod archive to use."
+)
+set(YARAMOD_URL_BAK
     "https://github.com/avast/yaramod/archive/aa06dd408c492a8f4488774caf2ee105ccc23ab5.zip"
     CACHE STRING "URL of YaraMod archive to use."
 )
@@ -54,6 +84,10 @@ set(YARAMOD_ARCHIVE_SHA256
 )
 
 set(SUPPORT_PKG_URL
+    "${DEP_BASE_URL}/retdec-support_2019-03-08.tar.xz"
+    CACHE STRING "URL of RetDec support package to use."
+)
+set(SUPPORT_PKG_URL_BAK
     "https://github.com/avast/retdec-support/releases/download/2019-03-08/retdec-support_2019-03-08.tar.xz"
     CACHE STRING "URL of RetDec support package to use."
 )
