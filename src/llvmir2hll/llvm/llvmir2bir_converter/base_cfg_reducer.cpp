@@ -182,7 +182,8 @@ void BaseCFGReducer::reduceNode(ShPtr<CFGNode> node, ShPtr<Statement> body,
 }
 
 /**
- * @brief 生成一条新的 @c goto 语句, 该语句从节点 @a node 跳转到节点 @a target .
+ * @brief 生成一条新的 @c goto 语句, 该语句从节点 @a node 跳转到节点 @a target.
+ *        在实验中，建议使用getGotoBody.
  *
  * @par 前置条件
  *  - @a node 和 @a target 都不为 @c nullptr .
@@ -325,7 +326,7 @@ bool BaseCFGReducer::isSwitch(const ShPtr<CFGNode> &node) const {
  * @brief 获取给定 @c switch 节点 @a switchNode 的所有分支.
  *
  * @returns @c switch 节点的所有分支, 每个分支由一个条件和该条件下第一个执行的
- * @c case 节点组成.
+ * @c case 节点组成. 
  *
  * @par 前置条件
  *  - @a switchNode 不为 @c nullptr .
@@ -437,7 +438,7 @@ ShPtr<Statement> BaseCFGReducer::getWhileBody(const ShPtr<CFGNode> &node) {
 
 /**
  * @brief 生成从 @a node 跳转到 @a target 的 @c goto 语句的目标代码块.
- *        这一函数可以用来将不能识别的结构化语句化简为 @c goto 语句.
+ *        函数生成的语句快包含一条跳转到 @a target 的goto语句，以及target的代码.
  *
  * @par 前置条件
  *  - @a node 和 @a target 均不为 @c nullptr .
@@ -480,7 +481,8 @@ ShPtr<Expression> BaseCFGReducer::getLogicalOr(const ShPtr<Expression> &lhs,
 }
 
 /**
- * @brief 获取给定的节点 @a node 的条件表达式.
+ * @brief 获取给定的节点 @a node 的条件表达式. 例如, 若node是条件分支节点, 返回true分支的条件,
+ *        true分支可以通过node->getSucc(0)获取.
  *
  * @par 前置条件
  *  - @a node 不为 @c nullptr .
@@ -549,7 +551,8 @@ void BaseCFGReducer::leaveLoop() {
 }
 
 /**
- * @brief 判断节点 @a node 所在的所有循环是否均已被化简.
+ * @brief 判断节点 @a node 所在的所有循环是否均已被化简. 若节点不在循环中, 则返回 @c true .
+ *        若循环已经通过reduceNode被化简了
  *
  * @par 前置条件
  *  - @a node 不为 @c nullptr .
@@ -560,7 +563,8 @@ bool BaseCFGReducer::isLoopReduced(const ShPtr<CFGNode> &node) const {
 }
 
 /**
- * @brief 获取 @a loopNode 所在未被化简的最内层循环的后继节点.
+ * @brief 获取 @a loopNode 所在循环中，被嵌套在最内层的那一个循环的后继节点. 循环的后继节点指循环结束后执行的第一个节点.
+ *        例如 while(1) {a; while(1) {b;} c;} d; 中, getLoopSuccessor(a)返回d, getLoopSuccessor(b)返回c.
  *
  * 若循环没有后继节点, 则返回 @c nullptr .
  *
@@ -574,7 +578,8 @@ ShPtr<CFGNode> BaseCFGReducer::getLoopSuccessor(ShPtr<CFGNode> loopNode) {
 }
 
 /**
- * @brief 获取所有CFGReducer正在分析的循环的后继节点.
+ * @brief 获取所有CFGReducer正在分析的循环的后继节点. 正在分析的循环即为enterLoop后还没有调用leaveLoop的节点对应的循环.
+ *        如果没有调用enterLoop, 则返回空列表.
  *
  * @returns 从内层循环到外层循环的后继节点列表. 若无循环正在被分析,
  * 则返回空列表.
