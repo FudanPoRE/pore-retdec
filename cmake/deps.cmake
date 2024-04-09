@@ -1,6 +1,7 @@
 
 set(DEP_BASE_URL
-    "http://10.176.37.16:9000/retdec/deps"
+    # "http://10.176.37.16:9000/retdec/deps"
+    "file:///home/pore/pj1/retdec/deps-tar"
     CACHE STRING "Base URL of dependencies."
 )
 
